@@ -100,3 +100,5 @@ const tweetSets = [
     "Feeling froggy? Leap into Ai Frog Coin! Our amphibious AI is leaping over the competition. Dive in to $AFC now! #AiFrogCoin #CryptoRoyalty #FinancialFreedom",
     "Why be a prince when you can be a crypto king? Our lily-pad ledger technology is making waves in the crypto pond. Dive in to $AFC now! #AiFrogCoin #Crypto #ToTheMoon 🚀",
 ];
+
+module.exports = { tweetSets };

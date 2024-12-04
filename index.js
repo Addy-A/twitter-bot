@@ -1,24 +1,16 @@
 require("dotenv").config({ path: __dirname + "/.env" });
-const twitterClient = require("./twitterClient.js");
-const tweetSets = require("./tweetSets.js");
-const CronJob = require("cron").CronJob;
+const { twitterClient } = require("./twitterClient.js")
+const { tweetSets } = require("./tweetSets.js");
+
 
 const express = require('express')
 const app = express()
 const port = process.env.PORT || 4000;
 
-app.get('/', (req, res) => {
-  res.send('Twitter Bot is running!');
-});
-
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).send('Something broke!');
-});
-
 app.listen(port, () => {
-  console.log(`Listening on port ${port}`)
-})
+    console.log(`Listening on port ${port}`)
+  })
+
 
 const tweetComponents = {
   openings: [
@@ -60,11 +52,12 @@ function generateRandomTweet() {
   return `${opening} ${feature} ${callToAction} ${hashtags}`;
 }
 
-function generateRandomTweetSet(tweetSets) {
+function generateRandomTweetSet() {
     const tweetSet = tweetSets[Math.floor(Math.random() * tweetSets.length)];
     console.log("Generated tweet set:", tweetSet);
     return tweetSet.join(" ");
 }
+
 
 const tweet = async () => {
     try {
@@ -75,5 +68,6 @@ const tweet = async () => {
         console.error("Error sending tweet:", e);
     }
 }
+
 
 tweet();
