@@ -54,17 +54,36 @@ function generateRandomTweetSet() {
 
 const tweet = async () => {
     try {
+        if (global.remainingRequests <= 0) {
+            const now = Date.now() / 1000;
+            if (now < global.resetTime) {
+                const waitTime = global.resetTime - now;
+                console.log(`Rate limit exceeded. Waiting ${waitTime} seconds.`);
+                await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
+            }
+        }
         const tweetContent = generateRandomTweet() || generateRandomTweetSet();
         console.log("Attempting to send tweet:", tweetContent);
-        await twitterClient.v2.tweet(tweetContent);
+        const response = await twitterClient.v2.tweet(tweetContent);
+
+        global.remainingRequests = parseInt(response.rateLimit.remaining);
+        global.resetTime = parseInt(response.rateLimit.reset);
         console.log("Tweet sent successfully:", tweetContent);
         return { success: true, message: "Tweet sent successfully", content: tweetContent };
     } catch (e) {
         console.error("Error sending tweet:", e);
         console.error("Error details:", JSON.stringify(e, null, 2));
+
+        if (e.rateLimit) {
+            global.remainingRequests = parseInt(e.rateLimit.remaining);
+            global.resetTime = parseInt(e.rateLimit.reset);
+        }
         return { success: false, message: "Error sending tweet", error: e.message, details: JSON.stringify(e, null, 2) };
     }
 }
+
+global.remainingRequests = 17;
+global.resetTime = Date.now() / 1000 + 86400;
 
 app.get('/healthcheck', (req, res) => {
   res.status(200).json({ status: 'OK', message: 'Server is running' });
