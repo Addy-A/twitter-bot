@@ -69,10 +69,4 @@ const tweet = async () => {
     }
 }
 
-// Runs every hour
-const cronTweet = new CronJob("0 0 * * * *", async () => {
-    tweet();
-});
-
-cronTweet.start();
-
+tweet();
