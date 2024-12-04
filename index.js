@@ -52,33 +52,41 @@ function generateRandomTweetSet() {
     return tweetSet.join(" ");
 }
 
-
 const tweet = async () => {
     try {
         const tweetContent = generateRandomTweet() || generateRandomTweetSet();
+        console.log("Attempting to send tweet:", tweetContent);
         await twitterClient.v2.tweet(tweetContent);
         console.log("Tweet sent successfully:", tweetContent);
         return { success: true, message: "Tweet sent successfully", content: tweetContent };
     } catch (e) {
         console.error("Error sending tweet:", e);
-        return { success: false, message: "Error sending tweet", error: e.message };
+        console.error("Error details:", JSON.stringify(e, null, 2));
+        return { success: false, message: "Error sending tweet", error: e.message, details: JSON.stringify(e, null, 2) };
     }
 }
 
 app.get('/', async (req, res) => {
-    const result = await tweet();
-    res.send(`
-        <html>
-            <body>
-                <h1>Twitter Bot</h1>
-                <div id="result">${result.message}</div>
-                <script>
-                    console.log('Tweet content:', ${JSON.stringify(result.content)});
-                </script>
-            </body>
-        </html>
-    `);
+    try {
+        const result = await tweet();
+        res.send(`
+            <html>
+                <body>
+                    <h1>Twitter Bot</h1>
+                    <div id="result">${result.message}</div>
+                    <div id="details">${result.details || ''}</div>
+                    <script>
+                        console.log('Tweet content:', ${JSON.stringify(result.content)});
+                    </script>
+                </body>
+            </html>
+        `);
+    } catch (error) {
+        console.error("Unexpected error:", error);
+        res.status(500).send("An unexpected error occurred");
+    }
 });
+
 
 const domain = process.env.DOMAIN || 'localhost';
 app.listen(port, () => {
