@@ -66,6 +66,10 @@ const tweet = async () => {
     }
 }
 
+app.get('/healthcheck', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
+});
+
 app.get('/', async (req, res) => {
     try {
         const result = await tweet();
