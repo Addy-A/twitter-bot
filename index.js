@@ -1,6 +1,10 @@
 require("dotenv").config({ path: __dirname + "/.env" });
+const express = require('express');
 const { twitterClient } = require("./twitterClient.js")
 const { tweetSets } = require("./tweetSets.js");
+
+const app = express();
+const port = process.env.PORT || 3000;
 
 const tweetComponents = {
   openings: [
@@ -54,15 +58,29 @@ const tweet = async () => {
         const tweetContent = generateRandomTweet() || generateRandomTweetSet();
         await twitterClient.v2.tweet(tweetContent);
         console.log("Tweet sent successfully:", tweetContent);
+        return { success: true, message: "Tweet sent successfully", content: tweetContent };
     } catch (e) {
         console.error("Error sending tweet:", e);
+        return { success: false, message: "Error sending tweet", error: e.message };
     }
 }
 
-tweet().then(() => {
-  console.log("Script execution completed.");
-  process.exit(0);
-}).catch((error) => {
-  console.error("An error occurred:", error);
-  process.exit(1);
+app.get('/', async (req, res) => {
+    const result = await tweet();
+    res.send(`
+        <html>
+            <body>
+                <h1>Twitter Bot</h1>
+                <div id="result">${result.message}</div>
+                <script>
+                    console.log('Tweet content:', ${JSON.stringify(result.content)});
+                </script>
+            </body>
+        </html>
+    `);
+});
+
+const domain = process.env.DOMAIN || 'localhost';
+app.listen(port, () => {
+    console.log(`Server running at http://${domain}:${port}`);
 });
