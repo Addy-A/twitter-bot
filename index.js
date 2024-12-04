@@ -2,16 +2,6 @@ require("dotenv").config({ path: __dirname + "/.env" });
 const { twitterClient } = require("./twitterClient.js")
 const { tweetSets } = require("./tweetSets.js");
 
-
-const express = require('express')
-const app = express()
-const port = process.env.PORT || 4000;
-
-app.listen(port, () => {
-    console.log(`Listening on port ${port}`)
-  })
-
-
 const tweetComponents = {
   openings: [
     "🐸 Ribbit your way to riches with Ai Frog Coin!",
@@ -69,5 +59,10 @@ const tweet = async () => {
     }
 }
 
-
-tweet();
+tweet().then(() => {
+  console.log("Script execution completed.");
+  process.exit(0);
+}).catch((error) => {
+  console.error("An error occurred:", error);
+  process.exit(1);
+});
