@@ -1,5 +1,6 @@
 require("dotenv").config({ path: __dirname + "/.env" });
 const twitterClient = require("./twitterClient.js");
+const tweetSets = require("./tweetSets.js");
 const CronJob = require("cron").CronJob;
 
 const express = require('express')
@@ -59,9 +60,15 @@ function generateRandomTweet() {
   return `${opening} ${feature} ${callToAction} ${hashtags}`;
 }
 
+function generateRandomTweetSet(tweetSets) {
+    const tweetSet = tweetSets[Math.floor(Math.random() * tweetSets.length)];
+    console.log("Generated tweet set:", tweetSet);
+    return tweetSet.join(" ");
+}
+
 const tweet = async () => {
     try {
-        const tweetContent = generateRandomTweet();
+        const tweetContent = generateRandomTweet() || generateRandomTweetSet();
         await twitterClient.v2.tweet(tweetContent);
         console.log("Tweet sent successfully:", tweetContent);
     } catch (e) {
