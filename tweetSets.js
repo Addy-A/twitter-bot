@@ -85,3 +85,5 @@ const tweetSets = [
     "Frogs didn’t choose crypto life. Crypto life chose frogs.",
     "Frogs are inevitable. $AFC just makes it obvious."
 ];
+
+module.exports = { tweetSets };
