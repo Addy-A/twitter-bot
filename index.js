@@ -180,41 +180,38 @@ function generateRandomTweet() {
 }
 
 function generateRandomTweetSet() {
-    const tweetSet = tweetSets[Math.floor(Math.random() * tweetSets.length)];
-    console.log("Generated tweet set:", tweetSet);
-    return tweetSet.join(" ");
+    if (!Array.isArray(tweetSets) || tweetSets.length === 0) {
+        console.error("tweetSets is not properly defined or is empty");
+    }
+    const randomTweet = tweetSets[Math.floor(Math.random() * tweetSets.length)];
+    console.log("Generated tweet:", randomTweet);
+    return randomTweet;
 }
+
 
 const tweet = async () => {
     try {
-        if (global.remainingRequests <= 0) {
-            const now = Date.now() / 1000;
-            if (now < global.resetTime) {
-                const waitTime = global.resetTime - now;
-                console.log(`Rate limit exceeded. Waiting ${waitTime} seconds.`);
-                await new Promise(resolve => setTimeout(resolve, waitTime * 1000));
-            }
-        }
-        const tweetContent = useRandomTweet ? generateRandomTweet() : generateRandomTweetSet();
-        useRandomTweet = !useRandomTweet;
+        const tweetContent = useRandomTweet ? generateRandomTweetSet() : generateTweet();
         console.log("Attempting to send tweet:", tweetContent);
+
         const response = await twitterClient.v2.tweet(tweetContent);
 
-        global.remainingRequests = parseInt(response.rateLimit.remaining);
-        global.resetTime = parseInt(response.rateLimit.reset);
-        console.log("Tweet sent successfully:", tweetContent);
-        return { success: true, message: "Tweet sent successfully", content: tweetContent };
-    } catch (e) {
-        console.error("Error sending tweet:", e);
-        console.error("Error details:", JSON.stringify(e, null, 2));
-
-        if (e.rateLimit) {
-            global.remainingRequests = parseInt(e.rateLimit.remaining);
-            global.resetTime = parseInt(e.rateLimit.reset);
+        if (response && response.data) {
+            console.log("Tweet sent successfully:", response.data.text);
+        } else {
+            console.error("Unexpected response format:", response);
         }
-        return { success: false, message: "Error sending tweet", error: e.message, details: JSON.stringify(e, null, 2) };
+
+        if (response && response.rateLimit) {
+            console.log("Rate limit remaining:", response.rateLimit.remaining);
+        } else {
+            console.log("Rate limit information not available");
+        }
+    } catch (e) {
+        console.error("Error sending tweet:", e.message);
+        console.error("Error details:", e);
     }
-}
+};
 
 global.remainingRequests = 17;
 global.resetTime = Date.now() / 1000 + 86400;
